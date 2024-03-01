@@ -1,12 +1,17 @@
-const express = require('express')
+const express = require('express');
+const cors = require('cors');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+
 const app = express();
 const port = process.env.PORT || 5000;
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://muntasirakib08:3rCS1B3dBJ0Z7iag@cluster0.qvgg1my.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+//middle ware
+app.use(cors());
+app.use(express.json());
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+
+const uri = "mongodb+srv://muntasirakib08:3rCS1B3dBJ0Z7iag@cluster0.qvgg1my.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -18,15 +23,33 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
    
-    await client.connect();
-   
-    await client.db("admin").command({ ping: 1 });
+     //await client.connect();
+    // await client.db("admin").command({ ping: 1 });
+
+     const userCollection = await client.db('userDB').collection('users');
+
+
+    app.post('/users', async (req, res)=>{
+        const user = req.body;
+        console.log("new user ", user);
+         const result = await userCollection.insertOne(user);
+         res.send(result);
+    });
+
+
+
+
+
+
+    //await client.db("admin").command({ ping: 1 });
     console.log("You successfully connected to MongoDB!");
-  } finally {
-    // await client.close();
+  } 
+  
+  finally {
+    //  await client.close();
   }
 }
-run().catch(console.dir);
+run().catch(err=>console.log(err));
 
 
 
@@ -36,7 +59,7 @@ run().catch(console.dir);
 
 
 app.get('/',(req, res) => {
-    res.send('My Pacha is cooooomming soon')
+    res.send('Hello from node mongo crud server')
 })
 
 
